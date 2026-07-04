@@ -3,6 +3,10 @@ name: Build and Deploy UI
 on:
   push:
     branches: [ main ]
+    paths-ignore:        # don't redeploy the app for doc-only changes
+      - '**.md'
+      - 'LICENSE'
+      - '.github/**'
 
 # Needs repo secrets: EC2_HOST, EC2_SSH_KEY (same EC2 as real-retro-api).
 jobs:
