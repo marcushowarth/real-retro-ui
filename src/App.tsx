@@ -7,6 +7,7 @@ import { ReferenceYearSlider } from './components/ReferenceYearSlider';
 import { InflationChart } from './components/InflationChart';
 import { CsvImport } from './components/CsvImport';
 import { CsvExport } from './components/CsvExport';
+import { AppFooter } from './components/AppFooter';
 import { Dataset, DataPoint, AdjustedPoint } from './types';
 
 export default function App() {
@@ -101,6 +102,8 @@ export default function App() {
           }
         </>
       )}
+
+      <AppFooter />
     </div>
   );
 }
