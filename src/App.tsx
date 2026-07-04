@@ -7,6 +7,7 @@ import { ReferenceYearSlider } from './components/ReferenceYearSlider';
 import { InflationChart } from './components/InflationChart';
 import { CsvImport } from './components/CsvImport';
 import { CsvExport } from './components/CsvExport';
+import { ManageSeriesDialog } from './components/ManageSeriesDialog';
 import { AppFooter } from './components/AppFooter';
 import { Dataset, DataPoint, AdjustedPoint } from './types';
 
@@ -18,6 +19,7 @@ export default function App() {
   const [points, setPoints] = useState<DataPoint[]>([]);
   const [referenceYear, setReferenceYear] = useState<number>(new Date().getFullYear());
   const [adjustedPoints, setAdjustedPoints] = useState<AdjustedPoint[]>([]);
+  const [showManageDialog, setShowManageDialog] = useState(false);
 
   // Set default reference year once RPI data is loaded
   useEffect(() => {
@@ -49,6 +51,12 @@ export default function App() {
     setPoints(imported);
   };
 
+  const handleManualSave = async (updated: DataPoint[]) => {
+    if (!selectedDatasetId) return;
+    await replacePoints(selectedDatasetId, updated);
+    setPoints(updated);
+  };
+
   const minYear = rpiMap.size > 0 ? Math.min(...rpiMap.keys()) : 1987;
 
   if (rpiLoading) return <p>Loading RPI data...</p>;
@@ -56,7 +64,7 @@ export default function App() {
 
   return (
     <div style={{ maxWidth: 1000, margin: '0 auto', padding: '1.5rem', fontFamily: 'sans-serif' }}>
-      <h1>Real Income Visualiser</h1>
+      <h1>Real Terms Visualiser</h1>
       <p style={{ color: '#555' }}>
         Compare income or cost data across time, adjusted for inflation (ONS RPI CHAW series).
       </p>
@@ -87,7 +95,17 @@ export default function App() {
               datasetName={datasets.find(d => d.id === selectedDatasetId)?.name ?? 'dataset'}
               points={points}
             />
+            <button onClick={() => setShowManageDialog(true)}>Manage data</button>
           </div>
+
+          {showManageDialog && (
+            <ManageSeriesDialog
+              datasetId={selectedDatasetId}
+              points={points}
+              onSave={handleManualSave}
+              onClose={() => setShowManageDialog(false)}
+            />
+          )}
 
           <ReferenceYearSlider
             minYear={minYear}
