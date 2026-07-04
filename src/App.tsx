@@ -64,7 +64,10 @@ export default function App() {
 
   return (
     <div style={{ maxWidth: 1000, margin: '0 auto', padding: '1.5rem', fontFamily: 'sans-serif' }}>
-      <h1>Real Terms Visualiser</h1>
+      <h1 style={{ marginBottom: '0.15rem' }}>REAL RETRO</h1>
+      <p style={{ margin: '0 0 1rem', color: '#e2674a', fontSize: '1.1rem', fontWeight: 600 }}>
+        Real Terms Visualiser
+      </p>
       <p style={{ color: '#555' }}>
         Compare income or cost data across time, adjusted for inflation (ONS RPI CHAW series).
       </p>
