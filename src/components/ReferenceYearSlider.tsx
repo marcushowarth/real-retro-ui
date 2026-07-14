@@ -10,14 +10,14 @@ interface Props {
 export function ReferenceYearSlider({ minYear, maxYear, value, onChange }: Props) {
   return (
     <div style={{ margin: '1rem 0' }}>
-      <label htmlFor="ref-year-slider">
-        <strong>Reference year: {value}</strong>
+      <label htmlFor="target-year-slider">
+        <strong>Target year: {value}</strong>
         &nbsp;— values shown in {value} money
       </label>
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '0.4rem' }}>
         <span>{minYear}</span>
         <input
-          id="ref-year-slider"
+          id="target-year-slider"
           type="range"
           min={minYear}
           max={maxYear}

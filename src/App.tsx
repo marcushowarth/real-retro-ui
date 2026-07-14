@@ -8,6 +8,7 @@ import { InflationChart } from './components/InflationChart';
 import { CsvImport } from './components/CsvImport';
 import { CsvExport } from './components/CsvExport';
 import { ManageSeriesDialog } from './components/ManageSeriesDialog';
+import { SpotValue } from './components/SpotValue';
 import { AppFooter } from './components/AppFooter';
 import { Dataset, DataPoint, AdjustedPoint } from './types';
 
@@ -15,6 +16,7 @@ export default function App() {
   const { rpiMap, latestYear, loading: rpiLoading, error: rpiError } = useRpi();
   const { datasets, createDataset, deleteDataset, getPoints, replacePoints } = useDatasets();
 
+  const [mode, setMode] = useState<'spot' | 'datasets'>('spot');
   const [selectedDatasetId, setSelectedDatasetId] = useState<string | null>(null);
   const [points, setPoints] = useState<DataPoint[]>([]);
   const [referenceYear, setReferenceYear] = useState<number>(new Date().getFullYear());
@@ -72,55 +74,78 @@ export default function App() {
         Compare income or cost data across time, adjusted for inflation (ONS RPI CHAW series).
       </p>
 
-      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1rem' }}>
-        <select
-          value={selectedDatasetId ?? ''}
-          onChange={e => setSelectedDatasetId(e.target.value || null)}
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
+        <button
+          onClick={() => setMode('spot')}
+          style={{ fontWeight: mode === 'spot' ? 700 : 400 }}
         >
-          <option value="">-- select a dataset --</option>
-          {datasets.map(d => (
-            <option key={d.id} value={d.id}>{d.name}</option>
-          ))}
-        </select>
-        <button onClick={handleNewDataset}>New dataset</button>
-        {selectedDatasetId && (
-          <button onClick={() => { deleteDataset(selectedDatasetId); setSelectedDatasetId(null); }}>
-            Delete dataset
-          </button>
-        )}
+          Spot value
+        </button>
+        <button
+          onClick={() => setMode('datasets')}
+          style={{ fontWeight: mode === 'datasets' ? 700 : 400 }}
+        >
+          Datasets
+        </button>
       </div>
 
-      {selectedDatasetId && (
+      {mode === 'spot' && (
+        <SpotValue rpiMap={rpiMap} latestYear={latestYear} />
+      )}
+
+      {mode === 'datasets' && (
         <>
-          <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-            <CsvImport datasetId={selectedDatasetId} onImport={handleImport} />
-            <CsvExport
-              datasetName={datasets.find(d => d.id === selectedDatasetId)?.name ?? 'dataset'}
-              points={points}
-            />
-            <button onClick={() => setShowManageDialog(true)}>Manage data</button>
+          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1rem' }}>
+            <select
+              value={selectedDatasetId ?? ''}
+              onChange={e => setSelectedDatasetId(e.target.value || null)}
+            >
+              <option value="">-- select a dataset --</option>
+              {datasets.map(d => (
+                <option key={d.id} value={d.id}>{d.name}</option>
+              ))}
+            </select>
+            <button onClick={handleNewDataset}>New dataset</button>
+            {selectedDatasetId && (
+              <button onClick={() => { deleteDataset(selectedDatasetId); setSelectedDatasetId(null); }}>
+                Delete dataset
+              </button>
+            )}
           </div>
 
-          {showManageDialog && (
-            <ManageSeriesDialog
-              datasetId={selectedDatasetId}
-              points={points}
-              onSave={handleManualSave}
-              onClose={() => setShowManageDialog(false)}
-            />
+          {selectedDatasetId && (
+            <>
+              <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+                <CsvImport datasetId={selectedDatasetId} onImport={handleImport} />
+                <CsvExport
+                  datasetName={datasets.find(d => d.id === selectedDatasetId)?.name ?? 'dataset'}
+                  points={points}
+                />
+                <button onClick={() => setShowManageDialog(true)}>Manage data</button>
+              </div>
+
+              {showManageDialog && (
+                <ManageSeriesDialog
+                  datasetId={selectedDatasetId}
+                  points={points}
+                  onSave={handleManualSave}
+                  onClose={() => setShowManageDialog(false)}
+                />
+              )}
+
+              <ReferenceYearSlider
+                minYear={minYear}
+                maxYear={latestYear}
+                value={referenceYear}
+                onChange={setReferenceYear}
+              />
+
+              {adjustedPoints.length > 0
+                ? <InflationChart points={adjustedPoints} referenceYear={referenceYear} />
+                : <p>No data yet — import a CSV or add points manually.</p>
+              }
+            </>
           )}
-
-          <ReferenceYearSlider
-            minYear={minYear}
-            maxYear={latestYear}
-            value={referenceYear}
-            onChange={setReferenceYear}
-          />
-
-          {adjustedPoints.length > 0
-            ? <InflationChart points={adjustedPoints} referenceYear={referenceYear} />
-            : <p>No data yet — import a CSV or add points manually.</p>
-          }
         </>
       )}
 
