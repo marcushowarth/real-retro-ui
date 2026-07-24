@@ -7,6 +7,7 @@ on:
       - '**.md'
       - 'LICENSE'
       - '.github/**'
+  workflow_dispatch:     # manual trigger — needed since .github/** is push-ignored above
 
 # Needs repo secrets: HETZNER_HOST, HETZNER_SSH_KEY (same host as real-retro-api).
 jobs:
