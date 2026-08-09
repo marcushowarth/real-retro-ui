@@ -8,6 +8,7 @@ import { formatCurrency } from '../utils/inflation';
 interface Props {
   points: AdjustedPoint[];
   referenceYear: number;
+  height?: number;
 }
 
 const DEFAULT_COLOURS = [
@@ -15,7 +16,7 @@ const DEFAULT_COLOURS = [
   '#0891b2', '#be185d', '#65a30d'
 ];
 
-export function InflationChart({ points, referenceYear }: Props) {
+export function InflationChart({ points, referenceYear, height = 400 }: Props) {
   // Group by series, build chart data keyed by year
   const seriesNames = [...new Set(points.map(p => p.seriesName))];
   const years = [...new Set(points.map(p => new Date(p.date).getFullYear()))].sort();
@@ -34,7 +35,7 @@ export function InflationChart({ points, referenceYear }: Props) {
   const formatTooltip = (value: number, name: string) => [formatCurrency(value), name];
 
   return (
-    <ResponsiveContainer width="100%" height={400}>
+    <ResponsiveContainer width="100%" height={height}>
       <LineChart data={chartData} margin={{ top: 10, right: 30, left: 20, bottom: 5 }}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="year" />

@@ -8,8 +8,11 @@ import { InflationChart } from './components/InflationChart';
 import { CsvImport } from './components/CsvImport';
 import { CsvExport } from './components/CsvExport';
 import { ManageSeriesDialog } from './components/ManageSeriesDialog';
+import { DatasetGuide } from './components/DatasetGuide';
+import { NewDatasetWizard, StartMode } from './components/NewDatasetWizard';
 import { SpotValue } from './components/SpotValue';
 import { AppFooter } from './components/AppFooter';
+import { buildExamplePoints, EXAMPLE_DATASET_NAME } from './data/exampleDataset';
 import { Dataset, DataPoint, AdjustedPoint } from './types';
 
 export default function App() {
@@ -22,6 +25,7 @@ export default function App() {
   const [referenceYear, setReferenceYear] = useState<number>(new Date().getFullYear());
   const [adjustedPoints, setAdjustedPoints] = useState<AdjustedPoint[]>([]);
   const [showManageDialog, setShowManageDialog] = useState(false);
+  const [showNewDatasetWizard, setShowNewDatasetWizard] = useState(false);
 
   // Set default reference year once RPI data is loaded
   useEffect(() => {
@@ -39,13 +43,21 @@ export default function App() {
     setAdjustedPoints(adjustPoints(points, referenceYear, rpiMap));
   }, [points, referenceYear, rpiMap]);
 
-  const handleNewDataset = async () => {
-    const name = window.prompt('Dataset name:');
-    if (!name) return;
+  const handleWizardSubmit = async (name: string, mode: StartMode) => {
     const id = uuidv4();
     await createDataset({ id, name });
+    if (mode === 'example') {
+      const examplePoints = buildExamplePoints(id);
+      await replacePoints(id, examplePoints);
+      setPoints(examplePoints);
+    }
     setSelectedDatasetId(id);
+    setShowNewDatasetWizard(false);
   };
+
+  // One-click shortcut from the guide panel — skips the wizard entirely,
+  // straight into a working example dataset.
+  const handleLoadExample = () => handleWizardSubmit(EXAMPLE_DATASET_NAME, 'example');
 
   const handleImport = async (imported: DataPoint[]) => {
     if (!selectedDatasetId) return;
@@ -95,6 +107,8 @@ export default function App() {
 
       {mode === 'datasets' && (
         <>
+          <DatasetGuide rpiMap={rpiMap} latestYear={latestYear} onLoadExample={handleLoadExample} />
+
           <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1rem' }}>
             <select
               value={selectedDatasetId ?? ''}
@@ -105,13 +119,19 @@ export default function App() {
                 <option key={d.id} value={d.id}>{d.name}</option>
               ))}
             </select>
-            <button onClick={handleNewDataset}>New dataset</button>
+            <button onClick={() => setShowNewDatasetWizard(true)}>New dataset</button>
             {selectedDatasetId && (
               <button onClick={() => { deleteDataset(selectedDatasetId); setSelectedDatasetId(null); }}>
                 Delete dataset
               </button>
             )}
           </div>
+
+          <NewDatasetWizard
+            open={showNewDatasetWizard}
+            onClose={() => setShowNewDatasetWizard(false)}
+            onSubmit={handleWizardSubmit}
+          />
 
           {selectedDatasetId && (
             <>
