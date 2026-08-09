@@ -53,7 +53,7 @@ export function InflationChart({ points, referenceYear, height = 400 }: Props) {
             stroke={DEFAULT_COLOURS[i % DEFAULT_COLOURS.length]}
             strokeWidth={2}
             dot={{ r: 4 }}
-            connectNulls={false}
+            connectNulls={true}
           />
         ))}
       </LineChart>
