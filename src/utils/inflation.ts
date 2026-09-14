@@ -26,18 +26,23 @@ export function adjust(
 }
 
 /**
- * Apply inflation adjustment to a list of data points.
+ * Apply inflation adjustment to a list of data points, by both RPI and CPI.
+ * cpiMap defaults to empty (yields adjustedAmountCpi === nominal, same
+ * graceful-fallback behaviour as adjust() itself) so callers that don't
+ * have CPI data loaded yet aren't forced to wait for it.
  */
 export function adjustPoints(
   points: DataPoint[],
   referenceYear: number,
-  rpiMap: Map<number, number>
+  rpiMap: Map<number, number>,
+  cpiMap: Map<number, number> = new Map()
 ): AdjustedPoint[] {
   return points.map(p => {
     const dataYear = new Date(p.date).getFullYear();
     return {
       ...p,
-      adjustedAmount: adjust(p.amount, dataYear, referenceYear, rpiMap)
+      adjustedAmount: adjust(p.amount, dataYear, referenceYear, rpiMap),
+      adjustedAmountCpi: adjust(p.amount, dataYear, referenceYear, cpiMap)
     };
   });
 }

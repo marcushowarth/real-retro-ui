@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceDot, ResponsiveContainer
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceDot, ResponsiveContainer
 } from 'recharts';
 import { adjust, formatCurrency } from '../utils/inflation';
 
@@ -8,13 +8,18 @@ interface Props {
   amount: number;
   inputYear: number;
   rpiMap: Map<number, number>;
+  cpiMap: Map<number, number>;
 }
 
-export function SpotValueChart({ amount, inputYear, rpiMap }: Props) {
+export function SpotValueChart({ amount, inputYear, rpiMap, cpiMap }: Props) {
+  // RPI is the driving axis (it's the longer-running series, CHAW starts
+  // 1987 vs CPI/D7BT's 1988) — a year with no CPI reading just omits that
+  // point rather than dropping the RPI one too.
   const years = [...rpiMap.keys()].sort((a, b) => a - b);
   const chartData = years.map(year => ({
     year,
-    value: Math.round(adjust(amount, inputYear, year, rpiMap))
+    rpiValue: Math.round(adjust(amount, inputYear, year, rpiMap)),
+    cpiValue: cpiMap.has(year) ? Math.round(adjust(amount, inputYear, year, cpiMap)) : undefined
   }));
 
   return (
@@ -24,15 +29,27 @@ export function SpotValueChart({ amount, inputYear, rpiMap }: Props) {
         <XAxis dataKey="year" />
         <YAxis tickFormatter={v => formatCurrency(v as number)} width={90} />
         <Tooltip
-          formatter={(value: number) => [formatCurrency(value), 'Equivalent value']}
+          formatter={(value: number, name: string) => [formatCurrency(value), name]}
           labelFormatter={year => `Year: ${year}`}
         />
+        <Legend />
         <Line
           type="monotone"
-          dataKey="value"
+          dataKey="rpiValue"
+          name="RPI-adjusted"
           stroke="#2563eb"
           strokeWidth={2}
           dot={{ r: 3 }}
+          isAnimationActive={false}
+        />
+        <Line
+          type="monotone"
+          dataKey="cpiValue"
+          name="CPI-adjusted"
+          stroke="#dc2626"
+          strokeWidth={2}
+          dot={{ r: 3 }}
+          connectNulls={true}
           isAnimationActive={false}
         />
         <ReferenceDot x={inputYear} y={Math.round(amount)} r={6} fill="#e2674a" stroke="none" />

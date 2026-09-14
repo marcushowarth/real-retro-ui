@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { useRpi } from './hooks/useRpi';
+import { useCpi } from './hooks/useCpi';
 import { useDatasets } from './hooks/useDatasets';
 import { adjustPoints } from './utils/inflation';
 import { ReferenceYearSlider } from './components/ReferenceYearSlider';
@@ -17,6 +18,7 @@ import { Dataset, DataPoint, AdjustedPoint } from './types';
 
 export default function App() {
   const { rpiMap, latestYear, loading: rpiLoading, error: rpiError } = useRpi();
+  const { cpiMap, loading: cpiLoading, error: cpiError } = useCpi();
   const { datasets, createDataset, deleteDataset, getPoints, replacePoints } = useDatasets();
 
   const [mode, setMode] = useState<'spot' | 'datasets'>('spot');
@@ -38,10 +40,10 @@ export default function App() {
     getPoints(selectedDatasetId).then(setPoints);
   }, [selectedDatasetId]);
 
-  // Recalculate adjusted points whenever points or reference year changes
+  // Recalculate adjusted points whenever points, reference year, or either index changes
   useEffect(() => {
-    setAdjustedPoints(adjustPoints(points, referenceYear, rpiMap));
-  }, [points, referenceYear, rpiMap]);
+    setAdjustedPoints(adjustPoints(points, referenceYear, rpiMap, cpiMap));
+  }, [points, referenceYear, rpiMap, cpiMap]);
 
   const handleWizardSubmit = async (name: string, mode: StartMode) => {
     const id = uuidv4();
@@ -83,7 +85,7 @@ export default function App() {
         Real Terms Visualiser
       </p>
       <p style={{ color: '#555' }}>
-        Compare income or cost data across time, adjusted for inflation (ONS RPI CHAW series).
+        Compare income or cost data across time, adjusted for inflation (ONS RPI CHAW and CPI D7BT series).
       </p>
 
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
@@ -102,12 +104,18 @@ export default function App() {
       </div>
 
       {mode === 'spot' && (
-        <SpotValue rpiMap={rpiMap} latestYear={latestYear} />
+        <SpotValue
+          rpiMap={rpiMap}
+          latestYear={latestYear}
+          cpiMap={cpiMap}
+          cpiLoading={cpiLoading}
+          cpiError={cpiError}
+        />
       )}
 
       {mode === 'datasets' && (
         <>
-          <DatasetGuide rpiMap={rpiMap} latestYear={latestYear} onLoadExample={handleLoadExample} />
+          <DatasetGuide rpiMap={rpiMap} latestYear={latestYear} cpiMap={cpiMap} onLoadExample={handleLoadExample} />
 
           <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1rem' }}>
             <select

@@ -3,6 +3,9 @@ export interface RpiEntry {
   index: number;
 }
 
+/** Same shape as RpiEntry — /api/cpi returns identical JSON to /api/rpi. */
+export type CpiEntry = RpiEntry;
+
 export interface DataPoint {
   id?: number;
   datasetId: string;
@@ -21,5 +24,6 @@ export interface Dataset {
 
 /** A DataPoint with its inflation-adjusted value for the current reference year */
 export interface AdjustedPoint extends DataPoint {
-  adjustedAmount: number;
+  adjustedAmount: number;      // RPI-adjusted — kept as the primary field, existing consumers unaffected
+  adjustedAmountCpi: number;   // CPI-adjusted twin, kanban #981
 }

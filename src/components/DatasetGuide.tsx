@@ -6,6 +6,7 @@ import { EXAMPLE_CSV, buildExamplePoints } from '../data/exampleDataset';
 interface Props {
   rpiMap: Map<number, number>;
   latestYear: number;
+  cpiMap: Map<number, number>;
   onLoadExample: () => void;
 }
 
@@ -26,8 +27,8 @@ const tierBox: React.CSSProperties = {
  * format documentation, which previously only existed as a code comment in
  * CsvImport.tsx. See Kanban #978.
  */
-export function DatasetGuide({ rpiMap, latestYear, onLoadExample }: Props) {
-  const previewPoints = adjustPoints(buildExamplePoints('preview'), latestYear, rpiMap);
+export function DatasetGuide({ rpiMap, latestYear, cpiMap, onLoadExample }: Props) {
+  const previewPoints = adjustPoints(buildExamplePoints('preview'), latestYear, rpiMap, cpiMap);
 
   return (
     <div
