@@ -12,6 +12,7 @@ import { ManageSeriesDialog } from './components/ManageSeriesDialog';
 import { DatasetGuide } from './components/DatasetGuide';
 import { NewDatasetWizard, StartMode } from './components/NewDatasetWizard';
 import { SpotValue } from './components/SpotValue';
+import { About } from './components/About';
 import { AppFooter } from './components/AppFooter';
 import { buildExamplePoints, EXAMPLE_DATASET_NAME } from './data/exampleDataset';
 import { Dataset, DataPoint, AdjustedPoint } from './types';
@@ -21,7 +22,7 @@ export default function App() {
   const { cpiMap, loading: cpiLoading, error: cpiError } = useCpi();
   const { datasets, createDataset, deleteDataset, getPoints, replacePoints } = useDatasets();
 
-  const [mode, setMode] = useState<'spot' | 'datasets'>('spot');
+  const [mode, setMode] = useState<'spot' | 'datasets' | 'about'>('spot');
   const [selectedDatasetId, setSelectedDatasetId] = useState<string | null>(null);
   const [points, setPoints] = useState<DataPoint[]>([]);
   const [referenceYear, setReferenceYear] = useState<number>(new Date().getFullYear());
@@ -101,7 +102,15 @@ export default function App() {
         >
           Datasets
         </button>
+        <button
+          onClick={() => setMode('about')}
+          style={{ fontWeight: mode === 'about' ? 700 : 400 }}
+        >
+          About
+        </button>
       </div>
+
+      {mode === 'about' && <About />}
 
       {mode === 'spot' && (
         <SpotValue
