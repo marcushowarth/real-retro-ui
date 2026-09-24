@@ -6,7 +6,7 @@ import { buildIndexMap } from '../utils/inflation';
  * Fetches one price-index series (RPI or CPI) from /api/index/{series} —
  * one hook for both, replacing the hand-copied useRpi/useCpi (kanban #1007).
  */
-export function useIndexSeries(series: 'rpi' | 'cpi') {
+export function useIndexSeries(series: 'rpi' | 'cpi' | 'rpi-millennium' | 'cpi-millennium') {
   const [entries, setEntries] = useState<IndexEntry[]>([]);
   const [indexMap, setIndexMap] = useState<Map<number, number>>(new Map());
   const [latestYear, setLatestYear] = useState<number>(new Date().getFullYear());

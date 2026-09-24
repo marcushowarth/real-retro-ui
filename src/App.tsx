@@ -17,8 +17,12 @@ import { buildExamplePoints, EXAMPLE_DATASET_NAME } from './data/exampleDataset'
 import { Dataset, DataPoint, AdjustedPoint } from './types';
 
 export default function App() {
-  const { indexMap: rpiMap, latestYear, loading: rpiLoading, error: rpiError } = useIndexSeries('rpi');
-  const { indexMap: cpiMap, loading: cpiLoading, error: cpiError } = useIndexSeries('cpi');
+  // 'rpi-millennium'/'cpi-millennium' are the live ONS series spliced back to 1209 via the
+  // Bank of England's Millennium dataset (kanban #1003) — a strict superset of 'rpi'/'cpi'
+  // (identical values for 1987/88-present, the live data wins on any overlap), so every
+  // consumer of these maps gets the extended range for free.
+  const { indexMap: rpiMap, latestYear, loading: rpiLoading, error: rpiError } = useIndexSeries('rpi-millennium');
+  const { indexMap: cpiMap, loading: cpiLoading, error: cpiError } = useIndexSeries('cpi-millennium');
   const { datasets, createDataset, deleteDataset, getPoints, replacePoints } = useDatasets();
 
   const [mode, setMode] = useState<'spot' | 'datasets' | 'about'>('spot');
@@ -85,7 +89,7 @@ export default function App() {
         Real Terms Visualiser
       </p>
       <p style={{ color: '#555' }}>
-        Compare income or cost data across time, adjusted for inflation (ONS RPI CHAW and CPI D7BT series).
+        Compare income or cost data across time, adjusted for inflation — ONS RPI/CPI from 1987/88, spliced back to 1209 via the Bank of England's Millennium dataset.
       </p>
 
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>

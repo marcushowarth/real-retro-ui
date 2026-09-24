@@ -3,7 +3,8 @@
 The front end for **REAL RETRO** — a real-terms retrospective visualiser.
 Compare any historical price or value series (income, car prices, the cost
 of a Mars bar — whatever you enter) at an equivalent point of purchasing
-power, anywhere from 1987 to today.
+power, anywhere from 1209 to today (ONS RPI/CPI from 1987/88, spliced back
+via the Bank of England's Millennium dataset before that).
 
 Built on the [`real-retro-api`](https://github.com/marcushowarth/real-retro-api)
 service, which wraps the [`fin-model`](https://github.com/marcushowarth/fin-model)
@@ -19,7 +20,7 @@ service, which wraps the [`fin-model`](https://github.com/marcushowarth/fin-mode
   its `(date, amount)` rows in a table, save or delete the whole label
   without touching any other label's data
 - **Reference-year slider** — drag to rebase every series onto the
-  purchasing power of any year from 1987 to the latest available RPI year
+  purchasing power of any year from 1209 to the latest available RPI year
 - **Inflation chart** — a multi-series line chart (Recharts) showing all
   labels in a dataset, adjusted to the chosen reference year
 - **Client-side only persistence** — datasets and points live entirely in
@@ -62,7 +63,7 @@ in this repo.
 ## Privacy
 
 Nothing you enter is stored on the server — `real-retro-api` has no
-database and no session; it only serves the public ONS RPI series. Datasets
+database and no session; it only serves public RPI/CPI index data. Datasets
 and data points you create persist client-side only (`localStorage`), never
 sent anywhere.
 

@@ -33,6 +33,28 @@ export function About() {
         deliberately, not averaged away.
       </p>
 
+      <h3 style={{ marginBottom: '0.4rem' }}>Pre-1987 data (back to 1209)</h3>
+      <p>
+        Years before ONS's own series begin are drawn from the Bank of England's{' '}
+        <a href="https://www.bankofengland.co.uk/statistics/research-datasets" target="_blank" rel="noopener noreferrer" style={link}>
+          "A Millennium of Macroeconomic Data for the UK"
+        </a>{' '}
+        (v3.1), sheet A47, used here with the Bank's permission (non-commercial reuse
+        confirmed by the Bank's Monetary &amp; Financial Data team, September 2026). This
+        is a splice of several named academic sources, not a single continuous survey —
+        annual figures only, joined onto the live ONS series above from 1987/88 onward:
+      </p>
+      <ul style={{ paddingLeft: '1.2rem' }}>
+        <li>
+          <strong>CPI (1209–2016):</strong> Schumpeter-Gilboy index via Mitchell (1988);
+          Crafts and Mills (1991); Feinstein (1991, 1998); ONS, O'Donoghue et al. (2004);
+          ONS CPI (1949–2014).
+        </li>
+        <li>
+          <strong>RPI (1209–2016):</strong> Clark (2009); ONS, O'Donoghue et al. (2004).
+        </li>
+      </ul>
+
       <h3 style={{ marginBottom: '0.4rem' }}>Code</h3>
       <p>
         Both repos are public:{' '}
