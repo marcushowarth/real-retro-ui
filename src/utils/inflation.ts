@@ -1,9 +1,9 @@
-import { RpiEntry, DataPoint, AdjustedPoint } from '../types';
+import { IndexEntry, DataPoint, AdjustedPoint } from '../types';
 
 /**
- * Build a year -> index lookup from the RPI series.
+ * Build a year -> index lookup from a price-index series (RPI or CPI).
  */
-export function buildRpiMap(entries: RpiEntry[]): Map<number, number> {
+export function buildIndexMap(entries: IndexEntry[]): Map<number, number> {
   return new Map(entries.map(e => [e.year, e.index]));
 }
 

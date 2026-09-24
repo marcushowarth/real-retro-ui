@@ -54,9 +54,10 @@ real-retro-ui  ──HTTP──▶  real-retro-api  ──depends on──▶  f
   (this repo)              (Quarkus-native)                 (Java engine)
 ```
 
-The API only serves the RPI index series (`/api/rpi`) and build info
-(`/api/version`) — it holds no user data. All dataset/point storage and the
-inflation adjustment math (`src/utils/inflation.ts`) live in this repo.
+The API only serves the RPI/CPI index series (`/api/index/{series}`) and
+build info (`/api/version`) — it holds no user data. All dataset/point
+storage and the inflation adjustment math (`src/utils/inflation.ts`) live
+in this repo.
 
 ## Privacy
 

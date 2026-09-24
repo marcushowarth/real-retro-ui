@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { useRpi } from './hooks/useRpi';
-import { useCpi } from './hooks/useCpi';
+import { useIndexSeries } from './hooks/useIndexSeries';
 import { useDatasets } from './hooks/useDatasets';
 import { adjustPoints } from './utils/inflation';
 import { ReferenceYearSlider } from './components/ReferenceYearSlider';
@@ -18,8 +17,8 @@ import { buildExamplePoints, EXAMPLE_DATASET_NAME } from './data/exampleDataset'
 import { Dataset, DataPoint, AdjustedPoint } from './types';
 
 export default function App() {
-  const { rpiMap, latestYear, loading: rpiLoading, error: rpiError } = useRpi();
-  const { cpiMap, loading: cpiLoading, error: cpiError } = useCpi();
+  const { indexMap: rpiMap, latestYear, loading: rpiLoading, error: rpiError } = useIndexSeries('rpi');
+  const { indexMap: cpiMap, loading: cpiLoading, error: cpiError } = useIndexSeries('cpi');
   const { datasets, createDataset, deleteDataset, getPoints, replacePoints } = useDatasets();
 
   const [mode, setMode] = useState<'spot' | 'datasets' | 'about'>('spot');

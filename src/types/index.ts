@@ -1,10 +1,8 @@
-export interface RpiEntry {
+/** One calendar year's reading from a price-index series (RPI or CPI) — /api/index/{series}. */
+export interface IndexEntry {
   year: number;
   index: number;
 }
-
-/** Same shape as RpiEntry — /api/cpi returns identical JSON to /api/rpi. */
-export type CpiEntry = RpiEntry;
 
 export interface DataPoint {
   id?: number;
