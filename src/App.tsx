@@ -17,25 +17,77 @@ import { buildExamplePoints, EXAMPLE_DATASET_NAME } from './data/exampleDataset'
 import { Dataset, DataPoint, AdjustedPoint } from './types';
 
 export default function App() {
-  // 'rpi-millennium'/'cpi-millennium' are the live ONS series spliced back to 1209 via the
-  // Bank of England's Millennium dataset (kanban #1003) — a strict superset of 'rpi'/'cpi'
-  // (identical values for 1987/88-present, the live data wins on any overlap), so every
-  // consumer of these maps gets the extended range for free.
-  const { indexMap: rpiMap, latestYear, loading: rpiLoading, error: rpiError } = useIndexSeries('rpi-millennium');
-  const { indexMap: cpiMap, loading: cpiLoading, error: cpiError } = useIndexSeries('cpi-millennium');
+  // 'rpi'/'cpi' are the modern ONS-only series (1987/88-present) — the default view.
+  // 'rpi-millennium'/'cpi-millennium' splice the same series back to 1209 via the Bank of
+  // England's Millennium dataset (kanban #1003); identical values for 1987/88-present, so
+  // switching to them only ever extends the range, never changes an existing value. Both
+  // pairs are fetched up front so toggling "include historical" is instant, not a fetch.
+  const { indexMap: rpiModernMap, latestYear, loading: rpiLoading, error: rpiError } = useIndexSeries('rpi');
+  const { indexMap: cpiModernMap, loading: cpiLoading, error: cpiError } = useIndexSeries('cpi');
+  const { indexMap: rpiMillenniumMap } = useIndexSeries('rpi-millennium');
+  const { indexMap: cpiMillenniumMap } = useIndexSeries('cpi-millennium');
   const { datasets, createDataset, deleteDataset, getPoints, replacePoints } = useDatasets();
 
   const [mode, setMode] = useState<'spot' | 'datasets' | 'about'>('spot');
   const [selectedDatasetId, setSelectedDatasetId] = useState<string | null>(null);
   const [points, setPoints] = useState<DataPoint[]>([]);
   const [referenceYear, setReferenceYear] = useState<number>(new Date().getFullYear());
+  // Spot value's own year pickers — lifted up (rather than local state in SpotValue) so the
+  // same confirm-on-uncheck flow below can cover them too (kanban #1013 follow-up).
+  const [spotInputYear, setSpotInputYear] = useState<number>(new Date().getFullYear());
+  const [spotTargetYear, setSpotTargetYear] = useState<number>(new Date().getFullYear());
   const [adjustedPoints, setAdjustedPoints] = useState<AdjustedPoint[]>([]);
   const [showManageDialog, setShowManageDialog] = useState(false);
   const [showNewDatasetWizard, setShowNewDatasetWizard] = useState(false);
 
-  // Set default reference year once RPI data is loaded
+  // Off by default — the 1209-present splice is neat but its 800-year range swamps the
+  // slider and squashes the chart for the common case of comparing recent years (kanban
+  // #1013). Checked, it swaps in the millennium-spliced maps everywhere; unchecked reverts
+  // to the modern-only ones, unaffected either way by the toggle itself.
+  const [includeHistorical, setIncludeHistorical] = useState(false);
+  const [pendingUncheck, setPendingUncheck] = useState(false);
+
+  const rpiMap = includeHistorical ? rpiMillenniumMap : rpiModernMap;
+  const cpiMap = includeHistorical ? cpiMillenniumMap : cpiModernMap;
+  const modernMinYear = rpiModernMap.size > 0 ? Math.min(...rpiModernMap.keys()) : 1987;
+  const minYear = rpiMap.size > 0 ? Math.min(...rpiMap.keys()) : 1987;
+
+  // Backstop clamp for all three year pickers: the explicit confirm-on-uncheck flow below
+  // already resets whichever one(s) the active tab cares about, but this catches any stale
+  // pre-1987 year left over from a previous historical session on the other tab.
   useEffect(() => {
-    if (latestYear) setReferenceYear(latestYear);
+    const clamp = (y: number) => Math.min(Math.max(y, minYear), latestYear || y);
+    setReferenceYear(clamp);
+    setSpotInputYear(clamp);
+    setSpotTargetYear(clamp);
+  }, [minYear, latestYear]);
+
+  const handleHistoricalToggle = (checked: boolean) => {
+    if (checked) { setIncludeHistorical(true); return; }
+    const stale = mode === 'datasets'
+      ? referenceYear < modernMinYear
+      : spotInputYear < modernMinYear || spotTargetYear < modernMinYear;
+    if (stale) { setPendingUncheck(true); return; }
+    setIncludeHistorical(false);
+  };
+
+  const confirmUncheck = () => {
+    setIncludeHistorical(false);
+    if (mode === 'datasets') {
+      setReferenceYear(y => Math.max(y, modernMinYear));
+    } else {
+      setSpotInputYear(y => Math.max(y, modernMinYear));
+      setSpotTargetYear(y => Math.max(y, modernMinYear));
+    }
+    setPendingUncheck(false);
+  };
+
+  // Set default years once RPI data is loaded
+  useEffect(() => {
+    if (!latestYear) return;
+    setReferenceYear(latestYear);
+    setSpotInputYear(latestYear);
+    setSpotTargetYear(latestYear);
   }, [latestYear]);
 
   // Load points when dataset selection changes
@@ -77,8 +129,6 @@ export default function App() {
     setPoints(updated);
   };
 
-  const minYear = rpiMap.size > 0 ? Math.min(...rpiMap.keys()) : 1987;
-
   if (rpiLoading) return <p>Loading RPI data...</p>;
   if (rpiError) return <p>Error loading RPI data: {rpiError}</p>;
 
@@ -89,8 +139,38 @@ export default function App() {
         Real Terms Visualiser
       </p>
       <p style={{ color: '#555' }}>
-        Compare income or cost data across time, adjusted for inflation — ONS RPI/CPI from 1987/88, spliced back to 1209 via the Bank of England's Millennium dataset.
+        Compare income or cost data across time, adjusted for inflation — ONS RPI/CPI from {modernMinYear}.
       </p>
+
+      <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', color: '#555', fontSize: '0.9rem' }}>
+        <input
+          type="checkbox"
+          checked={includeHistorical}
+          onChange={e => handleHistoricalToggle(e.target.checked)}
+        />
+        Include RPI/CPI spliced back to 1209 via BoE Millennium dataset
+      </label>
+
+      {pendingUncheck && (
+        <dialog
+          open
+          style={{ border: 'none', borderRadius: 8, padding: '1.5rem', width: 'min(420px, 90vw)', boxShadow: '0 4px 24px rgba(0,0,0,0.2)' }}
+        >
+          <h2 style={{ marginTop: 0, fontSize: '1.1rem' }}>Switch to modern data only?</h2>
+          <p style={{ color: '#555', fontSize: '0.9rem' }}>
+            {mode === 'datasets'
+              ? <>Your target year ({referenceYear}) is before {modernMinYear}, where the modern
+                  ONS series starts. Turning off historical data will move it to {modernMinYear}.</>
+              : <>One of your years (from {spotInputYear}, to {spotTargetYear}) is before{' '}
+                  {modernMinYear}, where the modern ONS series starts. Turning off historical
+                  data will move it to {modernMinYear}.</>}
+          </p>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+            <button onClick={() => setPendingUncheck(false)}>Cancel</button>
+            <button onClick={confirmUncheck}>Continue</button>
+          </div>
+        </dialog>
+      )}
 
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
         <button
@@ -122,6 +202,10 @@ export default function App() {
           cpiMap={cpiMap}
           cpiLoading={cpiLoading}
           cpiError={cpiError}
+          inputYear={spotInputYear}
+          onInputYearChange={setSpotInputYear}
+          targetYear={spotTargetYear}
+          onTargetYearChange={setSpotTargetYear}
         />
       )}
 

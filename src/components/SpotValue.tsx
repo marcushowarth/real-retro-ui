@@ -9,15 +9,22 @@ interface Props {
   cpiMap: Map<number, number>;
   cpiLoading: boolean;
   cpiError: string | null;
+  inputYear: number;
+  onInputYearChange: (year: number) => void;
+  targetYear: number;
+  onTargetYearChange: (year: number) => void;
 }
 
-export function SpotValue({ rpiMap, latestYear, cpiMap, cpiLoading, cpiError }: Props) {
+// inputYear/targetYear are lifted to App so the same "include historical" confirm-on-uncheck
+// flow used by the Datasets tab (kanban #1013) can also cover this tab's two year pickers.
+export function SpotValue({
+  rpiMap, latestYear, cpiMap, cpiLoading, cpiError,
+  inputYear, onInputYearChange, targetYear, onTargetYearChange
+}: Props) {
   const years = [...rpiMap.keys()].sort((a, b) => a - b);
   const minYear = years.length > 0 ? years[0] : 1987;
 
   const [amountInput, setAmountInput] = useState('');
-  const [inputYear, setInputYear] = useState(latestYear);
-  const [targetYear, setTargetYear] = useState(latestYear);
   const [showChart, setShowChart] = useState(false);
 
   const amount = parseFloat(amountInput);
@@ -41,7 +48,7 @@ export function SpotValue({ rpiMap, latestYear, cpiMap, cpiLoading, cpiError }: 
           <div>Year</div>
           <select
             value={inputYear}
-            onChange={e => setInputYear(Number(e.target.value))}
+            onChange={e => onInputYearChange(Number(e.target.value))}
             style={{ padding: '0.4rem' }}
           >
             {years.map(y => (
@@ -67,7 +74,7 @@ export function SpotValue({ rpiMap, latestYear, cpiMap, cpiLoading, cpiError }: 
                 minYear={minYear}
                 maxYear={latestYear}
                 value={targetYear}
-                onChange={setTargetYear}
+                onChange={onTargetYearChange}
               />
               <p style={{ fontSize: '1rem', color: '#555', margin: '1rem 0 0.5rem' }}>
                 {formatCurrency(amount)} in {inputYear} is worth, in {targetYear} money:
