@@ -24,3 +24,19 @@ export function formatLsd({ pounds, shillings, pence }: Lsd): string {
   if (shillings > 0) return `${shillings}/${pence > 0 ? pence : '-'}`;
   return `${pence}d`;
 }
+
+const NAMED = /^(?:£\s*(\d[\d,]*))?\s*(?:(\d+)s)?\s*(?:(\d+)d)?$/;
+const SLASHED = /^(?:(\d[\d,]*)\/)?(\d+)\/(\d+|-)$/;
+
+/** Reads "£1 10s 6d" (any part optional) or the slash forms "1/10/6", "10/6", "10/-". */
+export function parseLsd(input: string): Lsd | null {
+  const text = input.trim();
+  const match = text.match(NAMED) ?? text.match(SLASHED);
+  if (!text || !match) return null;
+  const [, pounds = '0', shillings = '0', pence = '0'] = match;
+  return {
+    pounds: Number(pounds.replace(/,/g, '')),
+    shillings: Number(shillings),
+    pence: pence === '-' ? 0 : Number(pence),
+  };
+}

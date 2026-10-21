@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatLsd, fromDecimal, toDecimal } from './lsd';
+import { formatLsd, fromDecimal, parseLsd, toDecimal } from './lsd';
 
 describe('toDecimal', () => {
   it('converts pounds, shillings and pence (20s to the pound, 12d to the shilling)', () => {
@@ -38,5 +38,20 @@ describe('formatLsd', () => {
     expect(formatLsd({ pounds: 0, shillings: 10, pence: 0 })).toBe('10/-');
     expect(formatLsd({ pounds: 0, shillings: 0, pence: 6 })).toBe('6d');
     expect(formatLsd({ pounds: 0, shillings: 0, pence: 0 })).toBe('0d');
+  });
+});
+
+describe('parseLsd', () => {
+  it.each([
+    ['£1 10s 6d', { pounds: 1, shillings: 10, pence: 6 }],
+    ['10s 6d', { pounds: 0, shillings: 10, pence: 6 }],
+    ['6d', { pounds: 0, shillings: 0, pence: 6 }],
+    ['£1', { pounds: 1, shillings: 0, pence: 0 }],
+    ['1/10/6', { pounds: 1, shillings: 10, pence: 6 }],
+    ['10/6', { pounds: 0, shillings: 10, pence: 6 }],
+    ['10/-', { pounds: 0, shillings: 10, pence: 0 }],
+    ['  £2 5s  ', { pounds: 2, shillings: 5, pence: 0 }],
+  ])('accepts %s', (input, expected) => {
+    expect(parseLsd(input)).toEqual(expected);
   });
 });
