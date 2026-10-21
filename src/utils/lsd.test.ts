@@ -15,7 +15,14 @@ describe('fromDecimal', () => {
     expect(fromDecimal(1.525)).toEqual({ pounds: 1, shillings: 10, pence: 6 });
   });
 
-  it('rounds to the nearest penny, carrying into shillings and pounds', () => {
+  it('rounds to the nearest farthing (quarter penny)', () => {
+    expect(fromDecimal(6.5 / 240)).toEqual({ pounds: 0, shillings: 0, pence: 6.5 });
+    expect(fromDecimal(0.25 / 240)).toEqual({ pounds: 0, shillings: 0, pence: 0.25 });
+    expect(fromDecimal(1 + 10 / 20 + 6.75 / 240)).toEqual({ pounds: 1, shillings: 10, pence: 6.75 });
+    expect(fromDecimal(0.3 / 240)).toEqual({ pounds: 0, shillings: 0, pence: 0.25 });
+  });
+
+  it('carries into shillings and pounds when rounding', () => {
     expect(fromDecimal(0.9999)).toEqual({ pounds: 1, shillings: 0, pence: 0 });
     expect(fromDecimal(0.0499)).toEqual({ pounds: 0, shillings: 1, pence: 0 });
   });

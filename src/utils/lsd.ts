@@ -11,12 +11,13 @@ export function toDecimal({ pounds, shillings, pence }: Lsd): number {
   return pounds + shillings / 20 + pence / 240;
 }
 
+/** Rounds to the nearest farthing, so pence may be fractional in quarters. */
 export function fromDecimal(amount: number): Lsd {
-  const totalPence = Math.round(amount * 240);
+  const farthings = Math.round(amount * 960);
   return {
-    pounds: Math.floor(totalPence / 240),
-    shillings: Math.floor((totalPence % 240) / 12),
-    pence: totalPence % 12,
+    pounds: Math.floor(farthings / 960),
+    shillings: Math.floor((farthings % 960) / 48),
+    pence: (farthings % 48) / 4,
   };
 }
 
