@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { adjust, formatCurrency } from '../utils/inflation';
+import { adjust } from '../utils/inflation';
+import { formatAmount, isLsdYear, parseAmount } from '../utils/lsd';
 import { ReferenceYearSlider } from './ReferenceYearSlider';
 import { SpotValueChart } from './SpotValueChart';
 
@@ -27,8 +28,9 @@ export function SpotValue({
   const [amountInput, setAmountInput] = useState('');
   const [showChart, setShowChart] = useState(false);
 
-  const amount = parseFloat(amountInput);
-  const hasAmount = amountInput !== '' && !isNaN(amount) && amount > 0;
+  // Before 1971 the amount can be typed in £sd ("£1 10s 6d", "10/6") as well as decimal.
+  const lsdInput = isLsdYear(inputYear);
+  const amount = parseAmount(amountInput, inputYear);
 
   return (
     <div>
@@ -36,9 +38,9 @@ export function SpotValue({
         <label>
           <div>Amount</div>
           <input
-            type="number"
+            type={lsdInput ? 'text' : 'number'}
             step="any"
-            placeholder="e.g. 25000"
+            placeholder={lsdInput ? 'e.g. £1 10s 6d' : 'e.g. 25000'}
             value={amountInput}
             onChange={e => setAmountInput(e.target.value)}
             style={{ width: '10rem', padding: '0.4rem' }}
@@ -58,8 +60,10 @@ export function SpotValue({
         </label>
       </div>
 
-      {!hasAmount ? (
-        <p style={{ color: '#777' }}>Enter an amount to see the real-terms value.</p>
+      {amount === null ? (
+        <p style={{ color: '#777' }}>
+          {lsdInput ? 'Enter an amount (£sd or decimal) to see the real-terms value.' : 'Enter an amount to see the real-terms value.'}
+        </p>
       ) : (
         <>
           <button onClick={() => setShowChart(s => !s)} style={{ marginBottom: '1rem' }}>
@@ -77,7 +81,7 @@ export function SpotValue({
                 onChange={onTargetYearChange}
               />
               <p style={{ fontSize: '1rem', color: '#555', margin: '1rem 0 0.5rem' }}>
-                {formatCurrency(amount)} in {inputYear} is worth, in {targetYear} money:
+                {formatAmount(amount, inputYear)} in {inputYear} is worth, in {targetYear} money:
               </p>
               <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
                 <div style={{ background: '#e6edfd', borderRadius: 8, padding: '0.5rem 0.9rem' }}>
@@ -85,7 +89,7 @@ export function SpotValue({
                     RPI-adjusted
                   </div>
                   <div style={{ fontSize: '1.3rem', fontWeight: 600, color: '#2563eb' }}>
-                    {formatCurrency(adjust(amount, inputYear, targetYear, rpiMap))}
+                    {formatAmount(adjust(amount, inputYear, targetYear, rpiMap), targetYear)}
                   </div>
                 </div>
                 <div style={{ background: '#fbe7e7', borderRadius: 8, padding: '0.5rem 0.9rem' }}>
@@ -93,7 +97,7 @@ export function SpotValue({
                     CPI-adjusted
                   </div>
                   <div style={{ fontSize: '1.3rem', fontWeight: 600, color: '#dc2626' }}>
-                    {cpiLoading ? '…' : cpiError ? 'unavailable' : formatCurrency(adjust(amount, inputYear, targetYear, cpiMap))}
+                    {cpiLoading ? '…' : cpiError ? 'unavailable' : formatAmount(adjust(amount, inputYear, targetYear, cpiMap), targetYear)}
                   </div>
                 </div>
               </div>
