@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { formatLsd, fromDecimal, isLsdYear, parseAmount, parseLsd, toDecimal } from './lsd';
+import { formatCurrency } from './inflation';
+import { formatAmount, formatLsd, fromDecimal, isLsdYear, parseAmount, parseLsd, toDecimal } from './lsd';
 
 describe('toDecimal', () => {
   it('converts pounds, shillings and pence (20s to the pound, 12d to the shilling)', () => {
@@ -93,5 +94,19 @@ describe('parseAmount', () => {
       }
     }
     expect(parseAmount('25s', 1960)).toBeNull();
+  });
+});
+
+describe('formatAmount', () => {
+  it('shows £sd with the decimal alongside for pre-1971 years', () => {
+    expect(formatAmount(1.525, 1960)).toBe('£1 10s 6d (£1.53)');
+    expect(formatAmount(0.525, 1960)).toBe('10/6 (£0.53)');
+    expect(formatAmount(12345.3333, 1900)).toBe('£12,345 6s 8d (£12,345.33)');
+  });
+
+  it('is unchanged from formatCurrency from 1971', () => {
+    for (const value of [1.525, 25000, 1234567.89]) {
+      expect(formatAmount(value, 1971)).toBe(formatCurrency(value));
+    }
   });
 });

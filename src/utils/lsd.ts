@@ -1,3 +1,5 @@
+import { formatCurrency } from './inflation';
+
 /** Pre-decimal sterling: 20 shillings to the pound, 12 pence to the shilling. */
 export interface Lsd {
   pounds: number;
@@ -53,4 +55,11 @@ export function parseAmount(input: string, year: number): number | null {
   const lsd = isLsdYear(year) ? parseLsd(text) : null;
   const amount = lsd ? toDecimal(lsd) : text === '' ? NaN : Number(text);
   return amount > 0 ? amount : null;
+}
+
+/** How an amount reads in a given year: £sd with the decimal alongside before 1971, else formatCurrency. */
+export function formatAmount(value: number, year: number): string {
+  if (!isLsdYear(year)) return formatCurrency(value);
+  const decimal = value.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return `${formatLsd(fromDecimal(value))} (£${decimal})`;
 }
