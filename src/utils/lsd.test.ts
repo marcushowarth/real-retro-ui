@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { formatCurrency } from './inflation';
-import { formatAmount, formatLsd, fromDecimal, isLsdYear, parseAmount, parseLsd, toDecimal } from './lsd';
+import { formatAmount, formatLsd, formatPounds, fromDecimal, isLsdYear, parseAmount, parseLsd, toDecimal } from './lsd';
 
 describe('toDecimal', () => {
   it('converts pounds, shillings and pence (20s to the pound, 12d to the shilling)', () => {
@@ -129,5 +129,13 @@ describe('formatAmount', () => {
     for (const value of [1.525, 25000, 1234567.89]) {
       expect(formatAmount(value, 1971)).toBe(formatCurrency(value));
     }
+  });
+});
+
+describe('formatPounds', () => {
+  it('shows pounds to the penny, for the chart tooltip', () => {
+    expect(formatPounds(0.2875)).toBe('£0.29');
+    expect(formatPounds(1.5)).toBe('£1.50');
+    expect(formatPounds(25000)).toBe('£25,000.00');
   });
 });

@@ -76,6 +76,10 @@ export function parseAmount(input: string, year: number): number | null {
 /** How an amount reads in a given year: £sd with the decimal alongside before 1971, else formatCurrency. */
 export function formatAmount(value: number, year: number): string {
   if (!isLsdYear(year)) return formatCurrency(value);
-  const decimal = value.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  return `${formatLsd(fromDecimal(value))} (£${decimal})`;
+  return `${formatLsd(fromDecimal(value))} (${formatPounds(value)})`;
+}
+
+/** "£1,234.56": pounds to the penny, where formatCurrency would round to whole pounds. */
+export function formatPounds(value: number): string {
+  return `£${value.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
