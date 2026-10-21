@@ -22,7 +22,8 @@ service, which wraps the [`fin-model`](https://github.com/marcushowarth/fin-mode
 - **Reference-year slider** — drag to rebase every series onto the
   purchasing power of any year from 1209 to the latest available RPI year
 - **Pre-decimal amounts** — on the Spot value tab, years before 1971 take and
-  show £sd: type `£1 10s 6d` or `10/6`, results read `£1 10s 6d (£1.53)`
+  show £sd to the farthing: type `£1 10s 6½d` or `10/6`, results read
+  `£1 10s 6d (£1.53)`; the chart across years shows decimal pounds to the penny
 - **Inflation chart** — a multi-series line chart (Recharts) showing all
   labels in a dataset, adjusted to the chosen reference year
 - **Client-side only persistence** — datasets and points live entirely in
