@@ -47,6 +47,15 @@ describe('formatLsd', () => {
     expect(formatLsd({ pounds: 0, shillings: 0, pence: 6 })).toBe('6d');
     expect(formatLsd({ pounds: 0, shillings: 0, pence: 0 })).toBe('0d');
   });
+
+  it('writes halfpennies and farthings as ½ ¼ ¾ after the pence', () => {
+    expect(formatLsd({ pounds: 1, shillings: 10, pence: 6.5 })).toBe('£1 10s 6½d');
+    expect(formatLsd({ pounds: 1, shillings: 10, pence: 0.75 })).toBe('£1 10s 0¾d');
+    expect(formatLsd({ pounds: 0, shillings: 10, pence: 6.25 })).toBe('10/6¼');
+    expect(formatLsd({ pounds: 0, shillings: 10, pence: 0.5 })).toBe('10/0½');
+    expect(formatLsd({ pounds: 0, shillings: 0, pence: 0.5 })).toBe('½d');
+    expect(formatLsd({ pounds: 0, shillings: 0, pence: 3.75 })).toBe('3¾d');
+  });
 });
 
 describe('parseLsd', () => {
