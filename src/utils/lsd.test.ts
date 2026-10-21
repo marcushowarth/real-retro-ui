@@ -68,12 +68,17 @@ describe('parseLsd', () => {
     ['10/6', { pounds: 0, shillings: 10, pence: 6 }],
     ['10/-', { pounds: 0, shillings: 10, pence: 0 }],
     ['  £2 5s  ', { pounds: 2, shillings: 5, pence: 0 }],
+    ['£1 10s 6½d', { pounds: 1, shillings: 10, pence: 6.5 }],
+    ['½d', { pounds: 0, shillings: 0, pence: 0.5 }],
+    ['3¾d', { pounds: 0, shillings: 0, pence: 3.75 }],
+    ['10/6¼', { pounds: 0, shillings: 10, pence: 6.25 }],
+    ['10/0½', { pounds: 0, shillings: 10, pence: 0.5 }],
   ])('accepts %s', (input, expected) => {
     expect(parseLsd(input)).toEqual(expected);
   });
 
   // Out-of-range parts are rejected, not normalised: "25s" is an error, not £1 5s.
-  it.each(['', '   ', 'abc', '-1', '£-1', '25s', '12d', '£1 20s', '20/-', '1/10/12', '1.525', '£1.50'])(
+  it.each(['', '   ', 'abc', '-1', '£-1', '25s', '12d', '£1 20s', '20/-', '1/10/12', '1.525', '£1.50', '12½d', '6½½d', 'd'])(
     'rejects %j',
     input => {
       expect(parseLsd(input)).toBeNull();

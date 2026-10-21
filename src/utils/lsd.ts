@@ -36,10 +36,17 @@ export function formatLsd({ pounds, shillings, pence }: Lsd): string {
   return `${pence > 0 && pence < 1 ? FRACTIONS[pence] : penceText(pence)}d`;
 }
 
-const NAMED = /^(?:£\s*(\d[\d,]*))?\s*(?:(\d+)s)?\s*(?:(\d+)d)?$/;
-const SLASHED = /^(?:(\d[\d,]*)\/)?(\d+)\/(\d+|-)$/;
+const NAMED = /^(?:£\s*(\d[\d,]*))?\s*(?:(\d+)s)?\s*(?:(\d+[¼½¾]?|[¼½¾])d)?$/;
+const SLASHED = /^(?:(\d[\d,]*)\/)?(\d+)\/(\d+[¼½¾]?|-)$/;
 
-/** Reads "£1 10s 6d" (any part optional) or the slash forms "1/10/6", "10/6", "10/-". */
+/** "6½" → 6.5, "½" → 0.5, "-" → 0. */
+function parsePence(text: string): number {
+  if (text === '-') return 0;
+  const fraction = Object.entries(FRACTIONS).find(([, symbol]) => symbol && text.endsWith(symbol));
+  return fraction ? Number(text.slice(0, -1) || 0) + Number(fraction[0]) : Number(text);
+}
+
+/** Reads "£1 10s 6½d" (any part optional) or the slash forms "1/10/6", "10/6½", "10/-". */
 export function parseLsd(input: string): Lsd | null {
   const text = input.trim();
   const match = text.match(NAMED) ?? text.match(SLASHED);
@@ -48,7 +55,7 @@ export function parseLsd(input: string): Lsd | null {
   const lsd = {
     pounds: Number(pounds.replace(/,/g, '')),
     shillings: Number(shillings),
-    pence: pence === '-' ? 0 : Number(pence),
+    pence: parsePence(pence),
   };
   return lsd.shillings < 20 && lsd.pence < 12 ? lsd : null;
 }
