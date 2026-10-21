@@ -34,9 +34,10 @@ export function parseLsd(input: string): Lsd | null {
   const match = text.match(NAMED) ?? text.match(SLASHED);
   if (!text || !match) return null;
   const [, pounds = '0', shillings = '0', pence = '0'] = match;
-  return {
+  const lsd = {
     pounds: Number(pounds.replace(/,/g, '')),
     shillings: Number(shillings),
     pence: pence === '-' ? 0 : Number(pence),
   };
+  return lsd.shillings < 20 && lsd.pence < 12 ? lsd : null;
 }

@@ -54,4 +54,11 @@ describe('parseLsd', () => {
   ])('accepts %s', (input, expected) => {
     expect(parseLsd(input)).toEqual(expected);
   });
+
+  // Out-of-range parts are rejected, not normalised: "25s" is an error, not £1 5s.
+  it.each(['', '   ', 'abc', '-1', '£-1', '25s', '12d', '£1 20s', '20/-', '1/10/12', '1.525', '£1.50'])(
+    'rejects %j',
+    input => {
+      expect(parseLsd(input)).toBeNull();
+    });
 });
