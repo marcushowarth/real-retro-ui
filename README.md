@@ -21,6 +21,9 @@ service, which wraps the [`fin-model`](https://github.com/marcushowarth/fin-mode
   without touching any other label's data
 - **Reference-year slider** — drag to rebase every series onto the
   purchasing power of any year from 1209 to the latest available RPI year
+- **Pre-decimal amounts** — on the Spot value tab, years before 1971 take and
+  show £sd to the farthing: type `£1 10s 6½d` or `10/6`, results read
+  `£1 10s 6d (£1.53)`; the chart across years shows decimal pounds to the penny
 - **Inflation chart** — a multi-series line chart (Recharts) showing all
   labels in a dataset, adjusted to the chosen reference year
 - **Client-side only persistence** — datasets and points live entirely in
@@ -28,15 +31,16 @@ service, which wraps the [`fin-model`](https://github.com/marcushowarth/fin-mode
 
 ## Stack
 
-React 18 · TypeScript · Vite · Recharts · uuid.
+React 18 · TypeScript · Vite 8 · Recharts · uuid · Vitest.
 
 ## Develop
 
-Requires Node 22+.
+Requires Node 22.12+ or 24 (Vitest 5 skips the odd releases 23 and 25).
 
 ```bash
 npm install
 npm run dev        # http://localhost:5173
+npm test           # Vitest
 ```
 
 The dev server proxies `/api` to the back end on `http://localhost:8090`, so

@@ -3,6 +3,7 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceDot, ResponsiveContainer
 } from 'recharts';
 import { adjust, formatCurrency } from '../utils/inflation';
+import { formatPounds } from '../utils/lsd';
 
 interface Props {
   amount: number;
@@ -16,10 +17,12 @@ export function SpotValueChart({ amount, inputYear, rpiMap, cpiMap }: Props) {
   // 1987 vs CPI/D7BT's 1988) — a year with no CPI reading just omits that
   // point rather than dropping the RPI one too.
   const years = [...rpiMap.keys()].sort((a, b) => a - b);
+  // Kept to the penny, not whole pounds, so small pre-1971 amounts don't flatten to £0.
+  const toPenny = (value: number) => Math.round(value * 100) / 100;
   const chartData = years.map(year => ({
     year,
-    rpiValue: Math.round(adjust(amount, inputYear, year, rpiMap)),
-    cpiValue: cpiMap.has(year) ? Math.round(adjust(amount, inputYear, year, cpiMap)) : undefined
+    rpiValue: toPenny(adjust(amount, inputYear, year, rpiMap)),
+    cpiValue: cpiMap.has(year) ? toPenny(adjust(amount, inputYear, year, cpiMap)) : undefined
   }));
 
   return (
@@ -29,7 +32,7 @@ export function SpotValueChart({ amount, inputYear, rpiMap, cpiMap }: Props) {
         <XAxis dataKey="year" />
         <YAxis tickFormatter={v => formatCurrency(v as number)} width={90} />
         <Tooltip
-          formatter={(value: number, name: string) => [formatCurrency(value), name]}
+          formatter={(value: number, name: string) => [formatPounds(value), name]}
           labelFormatter={year => `Year: ${year}`}
         />
         <Legend />
@@ -52,7 +55,7 @@ export function SpotValueChart({ amount, inputYear, rpiMap, cpiMap }: Props) {
           connectNulls={true}
           isAnimationActive={false}
         />
-        <ReferenceDot x={inputYear} y={Math.round(amount)} r={6} fill="#e2674a" stroke="none" />
+        <ReferenceDot x={inputYear} y={toPenny(amount)} r={6} fill="#e2674a" stroke="none" />
       </LineChart>
     </ResponsiveContainer>
   );
