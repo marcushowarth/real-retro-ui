@@ -41,3 +41,8 @@ export function parseLsd(input: string): Lsd | null {
   };
   return lsd.shillings < 20 && lsd.pence < 12 ? lsd : null;
 }
+
+/** Years shown in £sd. Decimal Day was 15 Feb 1971; at year granularity, 1971 counts as decimal. */
+export function isLsdYear(year: number): boolean {
+  return year < 1971;
+}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatLsd, fromDecimal, parseLsd, toDecimal } from './lsd';
+import { formatLsd, fromDecimal, isLsdYear, parseLsd, toDecimal } from './lsd';
 
 describe('toDecimal', () => {
   it('converts pounds, shillings and pence (20s to the pound, 12d to the shilling)', () => {
@@ -61,4 +61,13 @@ describe('parseLsd', () => {
     input => {
       expect(parseLsd(input)).toBeNull();
     });
+});
+
+describe('isLsdYear', () => {
+  it('is true up to 1970; Decimal Day was 15 February 1971', () => {
+    expect(isLsdYear(1209)).toBe(true);
+    expect(isLsdYear(1970)).toBe(true);
+    expect(isLsdYear(1971)).toBe(false);
+    expect(isLsdYear(2026)).toBe(false);
+  });
 });
