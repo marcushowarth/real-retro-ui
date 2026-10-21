@@ -35,7 +35,7 @@ React 18 · TypeScript · Vite 8 · Recharts · uuid · Vitest.
 
 ## Develop
 
-Requires Node 22+.
+Requires Node 22.12+ or 24 (Vitest 5 skips the odd releases 23 and 25).
 
 ```bash
 npm install
