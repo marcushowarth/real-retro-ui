@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatLsd, fromDecimal, isLsdYear, parseLsd, toDecimal } from './lsd';
+import { formatLsd, fromDecimal, isLsdYear, parseAmount, parseLsd, toDecimal } from './lsd';
 
 describe('toDecimal', () => {
   it('converts pounds, shillings and pence (20s to the pound, 12d to the shilling)', () => {
@@ -69,5 +69,29 @@ describe('isLsdYear', () => {
     expect(isLsdYear(1970)).toBe(true);
     expect(isLsdYear(1971)).toBe(false);
     expect(isLsdYear(2026)).toBe(false);
+  });
+});
+
+describe('parseAmount', () => {
+  it('accepts £sd or a plain decimal for pre-1971 years', () => {
+    expect(parseAmount('10s 6d', 1960)).toBeCloseTo(0.525, 10);
+    expect(parseAmount('£1 10s 6d', 1960)).toBeCloseTo(1.525, 10);
+    expect(parseAmount('1.525', 1960)).toBe(1.525);
+    expect(parseAmount('25000', 1960)).toBe(25000);
+  });
+
+  it('accepts only a plain decimal from 1971', () => {
+    expect(parseAmount('25000', 1980)).toBe(25000);
+    expect(parseAmount('1.5', 1980)).toBe(1.5);
+    expect(parseAmount('10s 6d', 1980)).toBeNull();
+  });
+
+  it('is null for empty, invalid, zero or negative input', () => {
+    for (const year of [1960, 1980]) {
+      for (const input of ['', 'abc', '0', '-5', '0d']) {
+        expect(parseAmount(input, year)).toBeNull();
+      }
+    }
+    expect(parseAmount('25s', 1960)).toBeNull();
   });
 });

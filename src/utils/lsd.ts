@@ -46,3 +46,11 @@ export function parseLsd(input: string): Lsd | null {
 export function isLsdYear(year: number): boolean {
   return year < 1971;
 }
+
+/** An amount typed for a given year: £sd text before 1971, a plain decimal always. Null unless positive. */
+export function parseAmount(input: string, year: number): number | null {
+  const text = input.trim();
+  const lsd = isLsdYear(year) ? parseLsd(text) : null;
+  const amount = lsd ? toDecimal(lsd) : text === '' ? NaN : Number(text);
+  return amount > 0 ? amount : null;
+}
