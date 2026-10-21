@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { fromDecimal, toDecimal } from './lsd';
+import { formatLsd, fromDecimal, toDecimal } from './lsd';
 
 describe('toDecimal', () => {
   it('converts pounds, shillings and pence (20s to the pound, 12d to the shilling)', () => {
@@ -23,5 +23,20 @@ describe('fromDecimal', () => {
     expect(fromDecimal(0)).toEqual({ pounds: 0, shillings: 0, pence: 0 });
     const large = { pounds: 12345, shillings: 6, pence: 8 };
     expect(fromDecimal(toDecimal(large))).toEqual(large);
+  });
+});
+
+describe('formatLsd', () => {
+  it('writes £1 and over in full', () => {
+    expect(formatLsd({ pounds: 1, shillings: 10, pence: 6 })).toBe('£1 10s 6d');
+    expect(formatLsd({ pounds: 5, shillings: 0, pence: 0 })).toBe('£5 0s 0d');
+    expect(formatLsd({ pounds: 12345, shillings: 6, pence: 8 })).toBe('£12,345 6s 8d');
+  });
+
+  it('writes under £1 as shillings/pence, "-" for no pence, and pence alone as d', () => {
+    expect(formatLsd({ pounds: 0, shillings: 10, pence: 6 })).toBe('10/6');
+    expect(formatLsd({ pounds: 0, shillings: 10, pence: 0 })).toBe('10/-');
+    expect(formatLsd({ pounds: 0, shillings: 0, pence: 6 })).toBe('6d');
+    expect(formatLsd({ pounds: 0, shillings: 0, pence: 0 })).toBe('0d');
   });
 });

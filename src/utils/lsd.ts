@@ -17,3 +17,10 @@ export function fromDecimal(amount: number): Lsd {
     pence: totalPence % 12,
   };
 }
+
+/** "£1 10s 6d" from £1 up; under £1 the period shorthand "10/6" ("10/-" with no pence), or "6d". */
+export function formatLsd({ pounds, shillings, pence }: Lsd): string {
+  if (pounds > 0) return `£${pounds.toLocaleString('en-GB')} ${shillings}s ${pence}d`;
+  if (shillings > 0) return `${shillings}/${pence > 0 ? pence : '-'}`;
+  return `${pence}d`;
+}
