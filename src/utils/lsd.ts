@@ -8,3 +8,12 @@ export interface Lsd {
 export function toDecimal({ pounds, shillings, pence }: Lsd): number {
   return pounds + shillings / 20 + pence / 240;
 }
+
+export function fromDecimal(amount: number): Lsd {
+  const totalPence = Math.round(amount * 240);
+  return {
+    pounds: Math.floor(totalPence / 240),
+    shillings: Math.floor((totalPence % 240) / 12),
+    pence: totalPence % 12,
+  };
+}
